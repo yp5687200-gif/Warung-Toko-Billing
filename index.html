@@ -278,7 +278,6 @@
 </div>
 
 <script>
-// MENGGUNAKAN DATABASE FORMAT BARU VERSI 4 UNTUK STRUKTUR STRUK ITEM
 let inventory = JSON.parse(localStorage.getItem('warung_inventory_v4')) || {};
 let transactions = JSON.parse(localStorage.getItem('warung_transactions_v4')) || [];
 let currentShopName = localStorage.getItem('warung_name') || "🏪 Sistem Kasir Warung Sembako";
@@ -303,16 +302,32 @@ function tampilkanNotifikasi(pesan, tipeClass = 'bg-primary') {
     setTimeout(() => { toast.remove(); }, 3000);
 }
 
+// PERBAIKAN FUNGSI KAMERA (ANTI LOCK & LEBIH STABIL)
 function toggleKamera() {
     let area = document.getElementById('cameraArea');
     if (area.style.display === 'none') {
         area.style.display = 'block';
-        html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }, false);
-        html5QrcodeScanner.render(onScanSuccess);
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.clear().catch(err => console.log(err));
+        }
+        html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+            fps: 10, 
+            qrbox: 250,
+            rememberLastUsedCamera: true 
+        }, false);
+        html5QrcodeScanner.render(onScanSuccess, onScanError);
     } else {
         area.style.display = 'none';
-        if (html5QrcodeScanner) { html5QrcodeScanner.clear().catch(err => console.log(err)); }
+        if (html5QrcodeScanner) { 
+            html5QrcodeScanner.clear()
+                .then(() => { document.getElementById('reader').innerHTML = ""; })
+                .catch(err => { document.getElementById('reader').innerHTML = ""; }); 
+        }
     }
+}
+
+function onScanError(err) {
+    console.warn("Mencari barcode...", err);
 }
 
 function onScanSuccess(decodedText, decodedResult) {
@@ -402,8 +417,4 @@ function updateCart() {
     tbody.innerHTML = '';
     let total = 0;
     cart.forEach(item => {
-        let subtotal = item.price * item.qty;
-        total += subtotal;
-        tbody.innerHTML += `<tr><td class="fw-bold text-dark">${item.name} <br><small class="text-muted" style="font-size:10px;">Code: ${item.barcode}</small></td><td>Rp ${item.price.toLocaleString('id-ID')}</td><td><span class="badge bg-secondary p-2">${item.qty}</span></td><td class="fw-bold">Rp ${subtotal.toLocaleString('id-ID')}</td></tr>`;
-    });
-    document.getElementById('g
+        let subtotal = item.price 
