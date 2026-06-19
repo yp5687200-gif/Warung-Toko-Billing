@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium POS Warung Sembako</title>
+    <title>Premium POS Warung Sembako + Smart Scanner</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -13,12 +13,10 @@
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            /* Background gradasi modern premium */
             background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
             min-height: 100vh;
         }
         
-        /* Desain Kartu Kustom */
         .custom-card {
             border: none;
             border-radius: 16px;
@@ -26,7 +24,6 @@
             background-color: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             margin-bottom: 24px;
-            transition: transform 0.2s;
         }
         
         .card-header-custom {
@@ -37,7 +34,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Desain Kamera Scanner */
         #reader {
             width: 100%;
             border: 3px dashed #4f46e5;
@@ -46,7 +42,6 @@
             background-color: #1e1e24;
         }
 
-        /* Desain Tabel Kasir */
         .table-custom {
             border-radius: 8px;
             overflow: hidden;
@@ -57,7 +52,6 @@
             font-weight: 600;
         }
 
-        /* Kustomisasi input */
         .form-control {
             border-radius: 8px;
             padding: 10px 14px;
@@ -68,7 +62,6 @@
             border-color: #4f46e5;
         }
 
-        /* Efek Tombol */
         .btn-custom {
             border-radius: 8px;
             padding: 10px 20px;
@@ -77,6 +70,8 @@
     </style>
 </head>
 <body>
+
+<div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; width: 320px;"></div>
 
 <div class="container my-5">
     <div class="text-center mb-5">
@@ -107,7 +102,7 @@
                             </div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="scanMode" id="modeGudang" value="gudang">
-                                <label class="form-check-label text-danger fw-bold" for="modeGudang"><i class="bi bi-box-seam me-1"></i>Gudang</label>
+                                <label class="form-check-label text-danger fw-bold" for="modeGudang"><i class="bi bi-box-seam me-1"></i>Gudang (Instant Stock)</label>
                             </div>
                         </div>
                         <div id="reader"></div>
@@ -150,7 +145,7 @@
 
             <div class="card custom-card border-start border-4 border-dark">
                 <div class="card-header-custom bg-dark text-white">
-                    <i class="bi bi-box-fill me-2"></i>Manajemen Stok Gudang
+                    <i class="bi bi-box-fill me-2"></i>Form Input / Edit Nama & Harga Barang
                 </div>
                 <div class="card-body p-4">
                     <form id="productForm" onsubmit="saveProduct(event)">
@@ -160,7 +155,7 @@
                                 <input type="text" id="prodBarcode" class="form-control" placeholder="Scan / ketik manual" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">Nama Produk Sembako</label>
+                                <label class="form-label small fw-bold text-muted">Nama Produk Sembako (Bisa Diketik Manual)</label>
                                 <input type="text" id="prodName" class="form-control" placeholder="Contoh: Beras, Minyak, dll" required>
                             </div>
                             <div class="col-md-4">
@@ -177,7 +172,7 @@
                             </div>
                         </div>
                         <button type="submit" class="btn btn-outline-dark btn-custom w-100 mt-4 fw-bold">
-                            <i class="bi bi-plus-square-fill me-2"></i>Simpan / Perbarui Data Barang
+                            <i class="bi bi-plus-square-fill me-2"></i>Simpan Perubahan / Daftarkan Barang Baru
                         </button>
                     </form>
                 </div>
@@ -252,6 +247,26 @@ let html5QrcodeScanner = null;
 let lastScannedCode = "";
 let lastScannedTime = 0;
 
+// FUNGSI NOTIFIKASI TOAST (POP-UP) PREMIUM
+function tampilkanNotifikasi(pesan, tipeClass = 'bg-primary') {
+    let container = document.getElementById('toastContainer');
+    let toast = document.createElement('div');
+    toast.className = `toast show align-items-center text-white ${tipeClass} border-0 mb-2 shadow-lg animate__animated animate__fadeInRight`;
+    toast.style.borderRadius = "12px";
+    toast.innerHTML = `
+        <div class="d-flex p-2">
+            <div class="toast-body fw-bold"><i class="bi bi-bell-fill me-2"></i>${pesan}</div>
+            <button type="button" class="btn-close btn-close-white m-auto me-2" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+    container.appendChild(toast);
+    
+    // Hilang otomatis dalam waktu 3 detik
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
 // FITUR KAMERA SCANNER DUAL MODE
 function toggleKamera() {
     let area = document.getElementById('cameraArea');
@@ -271,8 +286,8 @@ function toggleKamera() {
 
 function onScanSuccess(decodedText, decodedResult) {
     let currentTime = new Date().getTime();
-    if (decodedText === lastScannedCode && (currentTime - lastScannedTime < 2000)) {
-        return; 
+    if (decodedText === lastScannedCode && (currentTime - lastScannedTime < 1800)) {
+        return; // Jeda pelindung scan ganda dipercepat jadi 1.8 detik demi kenyamanan gudang
     }
     lastScannedCode = decodedText;
     lastScannedTime = currentTime;
@@ -285,6 +300,7 @@ function onScanSuccess(decodedText, decodedResult) {
     }
 }
 
+// 1. PROSES MODE KASIR (MASUK KERANJANG)
 function prosesBarcodeMasukKasir(barcode) {
     barcode = barcode.trim();
     if (inventory[barcode]) {
@@ -296,32 +312,52 @@ function prosesBarcodeMasukKasir(barcode) {
                 cart.push({ barcode, name: inventory[barcode].name, price: inventory[barcode].price, qty: 1, profit: inventory[barcode].profit });
             }
             updateCart();
+            // NOTIFIKASI KASIR BERHASIL
+            tampilkanNotifikasi(`🛒 ${inventory[barcode].name} dimasukkan ke keranjang!`, 'bg-success');
         } else {
-            alert('Stok barang ' + inventory[barcode].name + ' habis!');
+            tampilkanNotifikasi(`⚠️ Stok barang ${inventory[barcode].name} habis!`, 'bg-danger');
         }
     } else {
-        alert('Barcode (' + barcode + ') belum terdaftar di Gudang!');
+        tampilkanNotifikasi(`❌ Barcode (${barcode}) Belum terdaftar di Gudang!`, 'bg-warning text-dark');
     }
 }
 
+// 2. PROSES MODE GUDANG (INSTANT UPDATE + AUTO FOCUS)
 function prosesBarcodeMasukGudang(barcode) {
     barcode = barcode.trim();
-    document.getElementById('prodBarcode').value = barcode;
+    
+    // Cek apakah produk sudah ada di database stok
     if (inventory[barcode]) {
+        // JIKA SUDAH ADA: Langsung tambah +1 stoknya di tabel otomatis!
+        inventory[barcode].stock += 1;
+        localStorage.setItem('warung_inventory', JSON.stringify(inventory));
+        updateTables();
+        
+        // Mengisi form bawah juga sebagai info pelengkap
+        document.getElementById('prodBarcode').value = barcode;
         document.getElementById('prodName').value = inventory[barcode].name;
         document.getElementById('prodCost').value = inventory[barcode].cost;
         document.getElementById('prodPrice').value = inventory[barcode].price;
-        document.getElementById('prodStock').value = "";
-        document.getElementById('prodStock').focus();
+        document.getElementById('prodStock').value = inventory[barcode].stock;
+        
+        // NOTIFIKASI STOK OTOMATIS BERHASIL
+        tampilkanNotifikasi(`📦 Instant Stock: ${inventory[barcode].name} bertambah! (Total: ${inventory[barcode].stock})`, 'bg-dark');
     } else {
+        // JIKA BARANG BARU/BELUM ADA: Isi barcode dan lompat ke kolom Nama agar bisa diketik manual
+        document.getElementById('prodBarcode').value = barcode;
         document.getElementById('prodName').value = "";
         document.getElementById('prodCost').value = "";
         document.getElementById('prodPrice').value = "";
-        document.getElementById('prodStock').value = "";
+        document.getElementById('prodStock').value = 1; // Set default stok pertama
+        
+        // Fokuskan kursor ke Nama Produk agar kasir bisa langsung mengetik manual
         document.getElementById('prodName').focus();
+        
+        tampilkanNotifikasi(`✨ Barcode baru! Silakan ketik NAMA PRODUK secara manual di form bawah.`, 'bg-info text-dark');
     }
 }
 
+// Input manual kasir lewat ketik + Enter
 document.getElementById('scanInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         prosesBarcodeMasukKasir(this.value);
@@ -329,6 +365,7 @@ document.getElementById('scanInput').addEventListener('keypress', function(e) {
     }
 });
 
+// Menyimpan manual dari Form (Dipakai saat daftar barang baru atau edit info harga/nama)
 function saveProduct(e) {
     e.preventDefault();
     let barcode = document.getElementById('prodBarcode').value;
@@ -342,7 +379,7 @@ function saveProduct(e) {
     
     document.getElementById('productForm').reset();
     updateTables();
-    alert('Produk ' + name + ' berhasil disimpan!');
+    tampilkanNotifikasi(`💾 Data produk "${name}" berhasil disimpan/diperbarui!`, 'bg-primary');
 }
 
 function updateCart() {
@@ -369,7 +406,7 @@ function checkout() {
     cart = [];
     updateCart();
     updateTables();
-    alert('Transaksi Berhasil Disimpan!');
+    tampilkanNotifikasi(`🎉 Transaksi Selesai & Pembayaran Berhasil dicatat!`, 'bg-success');
 }
 
 function changeShopName() {
@@ -379,7 +416,7 @@ function changeShopName() {
         localStorage.setItem('warung_name', currentShopName);
         document.getElementById('shopNameDisplay').innerText = currentShopName;
         document.getElementById('shopNameInput').value = "";
-        alert('Nama billing berhasil diubah!');
+        tampilkanNotifikasi(`⚙️ Nama billing diubah menjadi ${currentShopName}`, 'bg-warning text-dark');
     }
 }
 
