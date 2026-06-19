@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium POS Warung Sembako + Smart Scanner</title>
+    <title>Enterprise POS Warung Sembako</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -16,7 +16,6 @@
             background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
             min-height: 100vh;
         }
-        
         .custom-card {
             border: none;
             border-radius: 16px;
@@ -25,7 +24,6 @@
             backdrop-filter: blur(10px);
             margin-bottom: 24px;
         }
-        
         .card-header-custom {
             border-top-left-radius: 16px !important;
             border-top-right-radius: 16px !important;
@@ -33,7 +31,6 @@
             font-weight: 700;
             letter-spacing: 0.5px;
         }
-
         #reader {
             width: 100%;
             border: 3px dashed #4f46e5;
@@ -41,7 +38,6 @@
             overflow: hidden;
             background-color: #1e1e24;
         }
-
         .table-custom {
             border-radius: 8px;
             overflow: hidden;
@@ -51,7 +47,6 @@
             color: #475569;
             font-weight: 600;
         }
-
         .form-control {
             border-radius: 8px;
             padding: 10px 14px;
@@ -61,24 +56,34 @@
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
             border-color: #4f46e5;
         }
-
         .btn-custom {
             border-radius: 8px;
             padding: 10px 20px;
             font-weight: 600;
         }
+        .nav-tabs-custom .nav-link {
+            border: none;
+            color: #64748b;
+            font-weight: 600;
+            padding: 8px 16px;
+        }
+        .nav-tabs-custom .nav-link.active {
+            background-color: #e2e8f0;
+            color: #0f172a;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
 
-<div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; width: 320px;"></div>
+<div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; width: 340px;"></div>
 
 <div class="container my-5">
     <div class="text-center mb-5">
         <h1 class="fw-800 text-dark display-5" id="shopNameDisplay" style="font-weight: 800; letter-spacing: -1px;">
             🏪 Sistem Kasir Warung Sembako
         </h1>
-        <p class="text-muted">Aplikasi Pembukuan & Scan Barcode Digital</p>
+        <p class="text-muted">Sistem Multi-Barcode & Manajerial Profit Terjadwal</p>
     </div>
     
     <div class="row">
@@ -102,7 +107,7 @@
                             </div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="scanMode" id="modeGudang" value="gudang">
-                                <label class="form-check-label text-danger fw-bold" for="modeGudang"><i class="bi bi-box-seam me-1"></i>Gudang (Instant Stock)</label>
+                                <label class="form-check-label text-danger fw-bold" for="modeGudang"><i class="bi bi-box-seam me-1"></i>Gudang (Instant Stock +1)</label>
                             </div>
                         </div>
                         <div id="reader"></div>
@@ -112,12 +117,12 @@
 
             <div class="card custom-card border-start border-4 border-success">
                 <div class="card-header-custom bg-success text-white">
-                    <i class="bi bi-receipt-cutoff me-2"></i>Keranjang Belanja Konsumen
+                    <i class="bi bi-receipt-cutoff me-2"></i>Keranjang Belanja Kasir
                 </div>
                 <div class="card-body p-4">
                     <div class="input-group mb-4">
                         <span class="input-group-text bg-white border-end-0"><i class="bi bi-keyboard text-muted"></i></span>
-                        <input type="text" id="scanInput" class="form-control border-start-0" placeholder="Atau ketik barcode manual di sini lalu Enter">
+                        <input type="text" id="scanInput" class="form-control border-start-0" placeholder="Atau ketik/scan manual di sini lalu Enter">
                     </div>
                     
                     <div class="table-responsive">
@@ -130,7 +135,7 @@
                                     <th>Subtotal</th>
                                 </tr>
                             </thead>
-                            <tbody class="table-group-divider"></tbody>
+                            <tbody></tbody>
                         </table>
                     </div>
                     <div class="d-flex justify-content-between align-items-center my-4 p-3 bg-light rounded-3">
@@ -145,18 +150,18 @@
 
             <div class="card custom-card border-start border-4 border-dark">
                 <div class="card-header-custom bg-dark text-white">
-                    <i class="bi bi-box-fill me-2"></i>Form Input / Edit Nama & Harga Barang
+                    <i class="bi bi-box-fill me-2"></i>Form Input / Hubungkan Multi-Barcode ke Produk
                 </div>
                 <div class="card-body p-4">
                     <form id="productForm" onsubmit="saveProduct(event)">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">Kode Barcode</label>
-                                <input type="text" id="prodBarcode" class="form-control" placeholder="Scan / ketik manual" required>
+                                <label class="form-label small fw-bold text-muted">Kode Barcode Ter-scan</label>
+                                <input type="text" id="prodBarcode" class="form-control" placeholder="Scan barcode barang di sini" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">Nama Produk Sembako (Bisa Diketik Manual)</label>
-                                <input type="text" id="prodName" class="form-control" placeholder="Contoh: Beras, Minyak, dll" required>
+                                <label class="form-label small fw-bold text-muted">Nama Produk (Bisa Diketik Manual)</label>
+                                <input type="text" id="prodName" class="form-control" placeholder="Ketik nama (Gunakan nama sama untuk multi-barcode)" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold text-muted">Harga Modal (Beli)</label>
@@ -167,12 +172,12 @@
                                 <input type="number" id="prodPrice" class="form-control" placeholder="Rp" required>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold text-muted">Jumlah Stok Masuk</label>
+                                <label class="form-label small fw-bold text-muted">Total Stok Sekarang</label>
                                 <input type="number" id="prodStock" class="form-control" placeholder="Pcs/Bks" required>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-outline-dark btn-custom w-100 mt-4 fw-bold">
-                            <i class="bi bi-plus-square-fill me-2"></i>Simpan Perubahan / Daftarkan Barang Baru
+                            <i class="bi bi-plus-square-fill me-2"></i>Simpan Produk / Daftarkan Barcode Baru
                         </button>
                     </form>
                 </div>
@@ -180,22 +185,40 @@
         </div>
 
         <div class="col-md-5">
+            
             <div class="card custom-card border-top border-4 border-success">
-                <div class="card-header-custom bg-transparent border-0 pb-0">
-                    <h5 class="fw-bold text-success mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Ringkasan Profit Hari Ini</h5>
+                <div class="card-header-custom bg-transparent border-0 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-success mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Rincian Keuntungan</h5>
+                    <button class="btn btn-sm btn-outline-danger fw-bold" onclick="hapusLaporanDenganPassword()">
+                        <i class="bi bi-lock-fill me-1"></i>Hapus Data
+                    </button>
                 </div>
-                <div class="card-body p-4 text-center">
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <div class="p-3 bg-light rounded-3">
-                                <div class="small fw-bold text-muted text-uppercase mb-1">Total Omzet</div>
-                                <h4 id="repOmzet" class="text-primary fw-700 mb-0">Rp 0</h4>
+                <div class="card-body p-4">
+                    <ul class="nav nav-pills nav-tabs-custom mb-3 bg-light p-1 rounded-3" id="pills-tab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="tab-hari" onclick="gantiPeriodeLaporan('hari')">Hari Ini</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-minggu" onclick="gantiPeriodeLaporan('minggu')">Minggu Ini</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-bulan" onclick="gantiPeriodeLaporan('bulan')">Bulan Ini</button>
+                        </li>
+                    </ul>
+
+                    <div class="text-center py-2">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="p-2 bg-light rounded-3">
+                                    <div class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 11px;">Total Omzet</div>
+                                    <h4 id="displayOmzet" class="text-primary fw-700 mb-0" style="font-size: 18px;">Rp 0</h4>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="p-3 bg-success-subtle rounded-3" style="background-color: #d1e7dd;">
-                                <div class="small fw-bold text-success text-uppercase mb-1">Untung Bersih</div>
-                                <h4 id="repProfit" class="text-success fw-700 mb-0">Rp 0</h4>
+                            <div class="col-6">
+                                <div class="p-2 rounded-3" style="background-color: #d1e7dd;">
+                                    <div class="small fw-bold text-success text-uppercase mb-1" style="font-size: 11px;">Untung Bersih</div>
+                                    <h4 id="displayProfit" class="text-success fw-700 mb-0" style="font-weight:700; font-size: 18px;">Rp 0</h4>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -204,17 +227,16 @@
 
             <div class="card custom-card">
                 <div class="card-header-custom bg-light border-bottom text-secondary">
-                    <i class="bi bi-database-fill me-2"></i>Daftar Katalog & Sisa Stok
+                    <i class="bi bi-database-fill me-2"></i>Daftar Katalog Stok Gudang
                 </div>
-                <div class="card-body p-3" style="max-height: 380px; overflow-y: auto;">
+                <div class="card-body p-3" style="max-height: 400px; overflow-y: auto;">
                     <table class="table table-sm table-hover align-middle" id="inventoryTable">
                         <thead>
                             <tr>
-                                <th>Barcode</th>
-                                <th>Nama</th>
+                                <th>Nama Produk</th>
                                 <th>Stok</th>
                                 <th>Harga Jual</th>
-                                <th>Untung</th>
+                                <th>Barcodes</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -239,19 +261,22 @@
 </div>
 
 <script>
-let inventory = JSON.parse(localStorage.getItem('warung_inventory')) || {};
-let reports = JSON.parse(localStorage.getItem('warung_reports')) || { omzet: 0, profit: 0 };
+// STRUKTUR DATABASE BARU: inventory digrupkan berdasarkan Nama Produk
+let inventory = JSON.parse(localStorage.getItem('warung_inventory_v2')) || {};
+// STRUKTUR DATA TRANSAKSI: Menyimpan data omzet, profit, dan tanggal per checkout
+let transactions = JSON.parse(localStorage.getItem('warung_transactions_v2')) || [];
 let currentShopName = localStorage.getItem('warung_name') || "🏪 Sistem Kasir Warung Sembako";
 let cart = [];
 let html5QrcodeScanner = null;
 let lastScannedCode = "";
 let lastScannedTime = 0;
+let periodeAktifLaporan = 'hari'; // default view laporan
 
-// FUNGSI NOTIFIKASI TOAST (POP-UP) PREMIUM
+// FUNGSI NOTIFIKASI TOAST (POP-UP)
 function tampilkanNotifikasi(pesan, tipeClass = 'bg-primary') {
     let container = document.getElementById('toastContainer');
     let toast = document.createElement('div');
-    toast.className = `toast show align-items-center text-white ${tipeClass} border-0 mb-2 shadow-lg animate__animated animate__fadeInRight`;
+    toast.className = `toast show align-items-center text-white ${tipeClass} border-0 mb-2 shadow-lg`;
     toast.style.borderRadius = "12px";
     toast.innerHTML = `
         <div class="d-flex p-2">
@@ -260,11 +285,18 @@ function tampilkanNotifikasi(pesan, tipeClass = 'bg-primary') {
         </div>
     `;
     container.appendChild(toast);
-    
-    // Hilang otomatis dalam waktu 3 detik
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
+    setTimeout(() => { toast.remove(); }, 3500);
+}
+
+// MENCARI PRODUK BERDASARKAN SALAH SATU BARCODE YANG COCOK
+function cariProdukBerdasarBarcode(barcode) {
+    barcode = barcode.trim();
+    for (let productName in inventory) {
+        if (inventory[productName].barcodes.includes(barcode)) {
+            return { name: productName, ...inventory[productName] };
+        }
+    }
+    return null;
 }
 
 // FITUR KAMERA SCANNER DUAL MODE
@@ -272,114 +304,125 @@ function toggleKamera() {
     let area = document.getElementById('cameraArea');
     if (area.style.display === 'none') {
         area.style.display = 'block';
-        html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", { fps: 15, qrbox: { width: 300, height: 150 } }
-        );
+        html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 15, qrbox: { width: 300, height: 150 } });
         html5QrcodeScanner.render(onScanSuccess);
     } else {
         area.style.display = 'none';
-        if (html5QrcodeScanner) {
-            html5QrcodeScanner.clear().catch(err => console.log(err));
-        }
+        if (html5QrcodeScanner) { html5QrcodeScanner.clear().catch(err => console.log(err)); }
     }
 }
 
 function onScanSuccess(decodedText, decodedResult) {
     let currentTime = new Date().getTime();
-    if (decodedText === lastScannedCode && (currentTime - lastScannedTime < 1800)) {
-        return; // Jeda pelindung scan ganda dipercepat jadi 1.8 detik demi kenyamanan gudang
-    }
+    if (decodedText === lastScannedCode && (currentTime - lastScannedTime < 1800)) { return; }
     lastScannedCode = decodedText;
     lastScannedTime = currentTime;
     
     let modeAktif = document.querySelector('input[name="scanMode"]:checked').value;
     if (modeAktif === 'kasir') {
-        prosesBarcodeMasukKasir(decodedText);
+        prosesBarcodeKasir(decodedText);
     } else {
-        prosesBarcodeMasukGudang(decodedText);
+        prosesBarcodeGudang(decodedText);
     }
 }
 
-// 1. PROSES MODE KASIR (MASUK KERANJANG)
-function prosesBarcodeMasukKasir(barcode) {
+// 1. SCAN KASIR (PENCARIAN BERDASARKAN MULTI-BARCODE)
+function prosesBarcodeKasir(barcode) {
     barcode = barcode.trim();
-    if (inventory[barcode]) {
-        if (inventory[barcode].stock > 0) {
-            let cartItem = cart.find(item => item.barcode === barcode);
+    let produk = cariProdukBerdasarBarcode(barcode);
+    
+    if (produk) {
+        if (inventory[produk.name].stock > 0) {
+            let cartItem = cart.find(item => item.name === produk.name);
             if (cartItem) {
                 cartItem.qty++;
             } else {
-                cart.push({ barcode, name: inventory[barcode].name, price: inventory[barcode].price, qty: 1, profit: inventory[barcode].profit });
+                cart.push({ name: produk.name, price: produk.price, qty: 1, profit: produk.profit });
             }
             updateCart();
-            // NOTIFIKASI KASIR BERHASIL
-            tampilkanNotifikasi(`🛒 ${inventory[barcode].name} dimasukkan ke keranjang!`, 'bg-success');
+            tampilkanNotifikasi(`🛒 ${produk.name} dimasukkan ke keranjang!`, 'bg-success');
         } else {
-            tampilkanNotifikasi(`⚠️ Stok barang ${inventory[barcode].name} habis!`, 'bg-danger');
+            tampilkanNotifikasi(`⚠️ Stok barang ${produk.name} habis!`, 'bg-danger');
         }
     } else {
         tampilkanNotifikasi(`❌ Barcode (${barcode}) Belum terdaftar di Gudang!`, 'bg-warning text-dark');
     }
 }
 
-// 2. PROSES MODE GUDANG (INSTANT UPDATE + AUTO FOCUS)
-function prosesBarcodeMasukGudang(barcode) {
+// 2. SCAN GUDANG (INSTANT STOCK +1 JIKA BARCODE/PRODUK SUDAH ADA)
+function prosesBarcodeGudang(barcode) {
     barcode = barcode.trim();
+    let produk = cariProdukBerdasarBarcode(barcode);
     
-    // Cek apakah produk sudah ada di database stok
-    if (inventory[barcode]) {
-        // JIKA SUDAH ADA: Langsung tambah +1 stoknya di tabel otomatis!
-        inventory[barcode].stock += 1;
-        localStorage.setItem('warung_inventory', JSON.stringify(inventory));
+    if (produk) {
+        // JIKA BARCODE SUDAH TERDAFTAR: Otomatis Tambah +1 Stok Produk Tersebut!
+        inventory[produk.name].stock += 1;
+        localStorage.setItem('warung_inventory_v2', JSON.stringify(inventory));
         updateTables();
         
-        // Mengisi form bawah juga sebagai info pelengkap
+        // Isi info ke form bawah
         document.getElementById('prodBarcode').value = barcode;
-        document.getElementById('prodName').value = inventory[barcode].name;
-        document.getElementById('prodCost').value = inventory[barcode].cost;
-        document.getElementById('prodPrice').value = inventory[barcode].price;
-        document.getElementById('prodStock').value = inventory[barcode].stock;
+        document.getElementById('prodName').value = produk.name;
+        document.getElementById('prodCost').value = produk.cost;
+        document.getElementById('prodPrice').value = produk.price;
+        document.getElementById('prodStock').value = inventory[produk.name].stock;
         
-        // NOTIFIKASI STOK OTOMATIS BERHASIL
-        tampilkanNotifikasi(`📦 Instant Stock: ${inventory[barcode].name} bertambah! (Total: ${inventory[barcode].stock})`, 'bg-dark');
+        tampilkanNotifikasi(`📦 Instant Stock: ${produk.name} bertambah! (Total: ${inventory[produk.name].stock})`, 'bg-dark');
     } else {
-        // JIKA BARANG BARU/BELUM ADA: Isi barcode dan lompat ke kolom Nama agar bisa diketik manual
+        // JIKA BARCODE BENAR-BENAR BARU:
         document.getElementById('prodBarcode').value = barcode;
         document.getElementById('prodName').value = "";
         document.getElementById('prodCost').value = "";
         document.getElementById('prodPrice').value = "";
-        document.getElementById('prodStock').value = 1; // Set default stok pertama
+        document.getElementById('prodStock').value = 1;
         
-        // Fokuskan kursor ke Nama Produk agar kasir bisa langsung mengetik manual
+        // Otomatis fokus agar pemilik/pekerja tinggal mengetik Nama Produk manual
         document.getElementById('prodName').focus();
-        
-        tampilkanNotifikasi(`✨ Barcode baru! Silakan ketik NAMA PRODUK secara manual di form bawah.`, 'bg-info text-dark');
+        tampilkanNotifikasi(`✨ Barcode baru dideteksi! Silakan masukkan Nama Produk secara manual di form bawah.`, 'bg-info text-dark');
     }
 }
 
-// Input manual kasir lewat ketik + Enter
+// Input manual kasir lewat Enter
 document.getElementById('scanInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
-        prosesBarcodeMasukKasir(this.value);
+        prosesBarcodeKasir(this.value);
         this.value = ''; 
     }
 });
 
-// Menyimpan manual dari Form (Dipakai saat daftar barang baru atau edit info harga/nama)
+// MENYIMPAN MANUAL FORM (Mendukung pendaftaran nama yang sama untuk banyak barcode)
 function saveProduct(e) {
     e.preventDefault();
-    let barcode = document.getElementById('prodBarcode').value;
-    let name = document.getElementById('prodName').value;
+    let barcode = document.getElementById('prodBarcode').value.trim();
+    let name = document.getElementById('prodName').value.trim();
     let cost = parseInt(document.getElementById('prodCost').value);
     let price = parseInt(document.getElementById('prodPrice').value);
     let stock = parseInt(document.getElementById('prodStock').value);
     
-    inventory[barcode] = { name, cost, price, stock, profit: (price - cost) };
-    localStorage.setItem('warung_inventory', JSON.stringify(inventory));
+    // Logika Pengelompokan: Jika nama produk sudah ada, tambahkan barcodenya ke dalam daftar kumpulannya
+    if (inventory[name]) {
+        if (!inventory[name].barcodes.includes(barcode) && barcode !== "") {
+            inventory[name].barcodes.push(barcode);
+        }
+        inventory[name].cost = cost;
+        inventory[name].price = price;
+        inventory[name].stock = stock;
+        inventory[name].profit = (price - cost);
+    } else {
+        // Jika nama produk baru gres
+        inventory[name] = {
+            barcodes: barcode !== "" ? [barcode] : [],
+            cost: cost,
+            price: price,
+            stock: stock,
+            profit: (price - cost)
+        };
+    }
     
+    localStorage.setItem('warung_inventory_v2', JSON.stringify(inventory));
     document.getElementById('productForm').reset();
     updateTables();
-    tampilkanNotifikasi(`💾 Data produk "${name}" berhasil disimpan/diperbarui!`, 'bg-primary');
+    tampilkanNotifikasi(`💾 Data produk "${name}" berhasil diperbarui!`, 'bg-primary');
 }
 
 function updateCart() {
@@ -394,19 +437,101 @@ function updateCart() {
     document.getElementById('grandTotal').innerText = total.toLocaleString('id-ID');
 }
 
+// CHECKOUT & SIMPAN HISTORI TRANSAKSI UNTUK LAPORAN TERJADWAL
 function checkout() {
     if (cart.length === 0) return alert('Keranjang masih kosong!');
+    
+    let totalOmzetTrans = 0;
+    let totalProfitTrans = 0;
+
     cart.forEach(item => {
-        inventory[item.barcode].stock -= item.qty;
-        reports.omzet += (item.price * item.qty);
-        reports.profit += (item.profit * item.qty);
+        inventory[item.name].stock -= item.qty;
+        totalOmzetTrans += (item.price * item.qty);
+        totalProfitTrans += (item.profit * item.qty);
     });
-    localStorage.setItem('warung_inventory', JSON.stringify(inventory));
-    localStorage.setItem('warung_reports', JSON.stringify(reports));
+    
+    // Simpan histori transaksi dengan Tanggal & Waktu sekarang
+    transactions.push({
+        waktu: new Date().toISOString(),
+        omzet: totalOmzetTrans,
+        profit: totalProfitTrans
+    });
+
+    localStorage.setItem('warung_inventory_v2', JSON.stringify(inventory));
+    localStorage.setItem('warung_transactions_v2', JSON.stringify(transactions));
+    
     cart = [];
     updateCart();
     updateTables();
-    tampilkanNotifikasi(`🎉 Transaksi Selesai & Pembayaran Berhasil dicatat!`, 'bg-success');
+    tampilkanNotifikasi(`🎉 Transaksi Sukses! Keuntungan berhasil dicatat.`, 'bg-success');
+}
+
+// MENGHITUNG ULANG PROFIT BERDASARKAN TAB PERIODE YANG DIPILIH
+function hitungDanTampilkanLaporan() {
+    let omzetAkhir = 0;
+    let profitAkhir = 0;
+    
+    let sekarang = new Date();
+    let hariIniStr = sekarang.toDateString();
+    
+    // Batas 7 hari yang lalu untuk Minggu ini
+    let semingguLalu = new Date();
+    semingguLalu.setDate(sekarang.getDate() - 7);
+    
+    let bulanSekarang = sekarang.getMonth();
+    let tahunSekarang = sekarang.getFullYear();
+
+    transactions.forEach(t => {
+        let tDate = new Date(t.waktu);
+        
+        if (periodeAktifLaporan === 'hari') {
+            if (tDate.toDateString() === hariIniStr) {
+                omzetAkhir += t.omzet;
+                profitAkhir += t.profit;
+            }
+        } else if (periodeAktifLaporan === 'minggu') {
+            if (tDate >= semingguLalu) {
+                omzetAkhir += t.omzet;
+                profitAkhir += t.profit;
+            }
+        } else if (periodeAktifLaporan === 'bulan') {
+            if (tDate.getMonth() === bulanSekarang && tDate.getFullYear() === tahunSekarang) {
+                omzetAkhir += t.omzet;
+                profitAkhir += t.profit;
+            }
+        }
+    });
+
+    document.getElementById('displayOmzet').innerText = 'Rp ' + omzetAkhir.toLocaleString('id-ID');
+    document.getElementById('displayProfit').innerText = 'Rp ' + profitAkhir.toLocaleString('id-ID');
+}
+
+function gantiPeriodeLaporan(periode) {
+    periodeAktifLaporan = periode;
+    document.querySelectorAll('.nav-tabs-custom .nav-link').forEach(btn => btn.classList.remove('active'));
+    
+    if(periode === 'hari') document.getElementById('tab-hari').classList.add('active');
+    if(periode === 'minggu') document.getElementById('tab-minggu').classList.add('active');
+    if(periode === 'bulan') document.getElementById('tab-bulan').classList.add('active');
+    
+    hitungDanTampilkanLaporan();
+}
+
+// FITUR PENGAMAN PASSWORD PEMILIK UNTUK HAPUS DATA KEUANGAN
+function hapusLaporanDenganPassword() {
+    let inputPassword = prompt("🔐 PENGAMAN PEMILIK:\nMasukkan password pemilik untuk menghapus seluruh data keuangan kasir:");
+    
+    // Password default: owner123
+    if (inputPassword === "owner123") {
+        if(confirm("Apakah Anda yakin ingin menghapus semua histori transaksi & profit? Tindakan ini tidak bisa dibatalkan.")) {
+            transactions = [];
+            localStorage.setItem('warung_transactions_v2', JSON.stringify(transactions));
+            hitungDanTampilkanLaporan();
+            tampilkanNotifikasi("🗑️ Semua data laporan keuangan telah dihapus bersih!", "bg-danger");
+        }
+    } else if (inputPassword !== null) {
+        alert("❌ Password Salah! Anda tidak memiliki akses pemilik untuk menghapus data keuangan.");
+    }
 }
 
 function changeShopName() {
@@ -422,23 +547,26 @@ function changeShopName() {
 
 function updateTables() {
     document.getElementById('shopNameDisplay').innerText = currentShopName;
-    document.getElementById('repOmzet').innerText = 'Rp ' + reports.omzet.toLocaleString('id-ID');
-    document.getElementById('repProfit').innerText = 'Rp ' + reports.profit.toLocaleString('id-ID');
+    hitungDanTampilkanLaporan();
     
     let tbody = document.querySelector('#inventoryTable tbody');
     tbody.innerHTML = '';
-    for (let barcode in inventory) {
-        let item = inventory[barcode];
+    
+    for (let productName in inventory) {
+        let item = inventory[productName];
+        // Buat daftar badge kecil untuk menampilkan list barcode produk tersebut
+        let barcodeBadges = item.barcodes.map(b => `<span class="badge bg-light text-dark border me-1 small" style="font-size:10px;">${b}</span>`).join('');
+        
         tbody.innerHTML += `<tr>
-            <td class="small text-muted">${barcode}</td>
-            <td class="fw-bold text-dark">${item.name}</td>
+            <td class="fw-bold text-dark">${productName}</td>
             <td><span class="badge ${item.stock < 5 ? 'bg-danger':'bg-success'}">${item.stock}</span></td>
             <td>Rp ${item.price.toLocaleString('id-ID')}</td>
-            <td class="text-success fw-bold">+${item.profit.toLocaleString('id-ID')}</td>
+            <td>${barcodeBadges || '<span class="text-muted small">Tidak ada</span>'}</td>
         </tr>`;
     }
 }
 
+// Inisialisasi awal tabel saat web pertama kali dibuka
 updateTables();
 </script>
 
