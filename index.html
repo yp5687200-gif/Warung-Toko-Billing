@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Warung Sembako</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container my-4">
+    <h1 class="text-center mb-4 text-primary" id="shopNameDisplay">🏪 Sistem Kasir Warung Sembako</h1>
+    
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card shadow-sm border-primary">
+                <div class="card-header bg-primary text-white">🛒 Scan Belanjaan Konsumen</div>
+                <div class="card-body">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Barcode</span>
+                        <input type="text" id="scanInput" class="form-control" placeholder="Arahkan scanner kemari / ketik manual lalu Enter" autofocus>
+                    </div>
+                    
+                    <h5>Keranjang Belanja:</h5>
+                    <table class="table table-striped" id="cartTable">
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>Harga</th>
+                                <th>Qty</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <h3 class="text-end text-danger">Total: Rp <span id="grandTotal">0</span></h3>
+                    <button class="btn btn-success w-100 fw-bold" onclick="checkout()">Bayar & Selesai Transaksi</button>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">📦 Input / Update Stok Gudang</div>
+                <div class="card-body">
+                    <form id="productForm" onsubmit="saveProduct(event)">
+                        <div class="row g-2">
+                            <div class="col-6"><input type="text" id="prodBarcode" class="form-control" placeholder="Barcode Produk" required></div>
+                            <div class="col-6"><input type="text" id="prodName" class="form-control" placeholder="Nama Produk" required></div>
+                            <div class="col-4"><input type="number" id="prodCost" class="form-control" placeholder="Harga Modal" required></div>
+                            <div class="col-4"><input type="number" id="prodPrice" class="form-control" placeholder="Harga Jual" required></div>
+                            <div class="col-4"><input type="number" id="prodStock" class="form-control" placeholder="Jumlah Stok" required></div>
+                        </div>
+                        <button type="submit" class="btn btn-secondary w-100 mt-2">Simpan ke Database</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card shadow-sm border-success">
+                <div class="card-header bg-success text-white">📈 Laporan Profit Keuntungan</div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <h6>Total Omzet</h6>
+                            <h4 id="repOmzet" class="text-primary">Rp 0</h4>
+                        </div>
+                        <div class="col-6">
+                            <h6>Untung Bersih</h6>
+                            <h4 id="repProfit" class="text-success">Rp 0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">📋 Daftar Semua Barang</div>
+                <div class="card-body" style="max-height: 230px; overflow-y: auto;">
+                    <table class="table table-sm table-hover" id="inventoryTable">
+                        <thead>
+                            <tr>
+                                <th>Barcode</th>
+                                <th>Nama</th>
+                                <th>Stok</th>
+                                <th>Jual</th>
+                                <th>Untung/Pcs</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-warning">
+                <div class="card-header bg-warning text-dark fw-bold">⚙️ Pengaturan Nama Billing / Warung</div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" id="shopNameInput" class="form-control" placeholder="Ketik nama warung baru di sini">
+                        <button class="btn btn-warning fw-bold" onclick="changeShopName()">Ganti Nama</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+// Menggunakan localStorage agar data tidak hilang saat browser di-refresh
+let inventory = JSON.parse(localStorage.getItem('warung_inventory')) || {};
+let reports = JSON.parse(localStorage.getItem('warung_reports')) || { omzet: 0, profit: 0 };
+let currentShopName = localStorage.getItem('warung_name') || "🏪 Sistem Kasir Warung Sembako";
+let cart = [];
+
+// Fungsi untuk Mengubah Nama Warung secara Live
+function changeShopName() {
+    let inputName = document.getElementById('shopNameInput').value.trim();
+    if (inputName !== "") {
+        currentShopName = inputName;
+        localStorage.setItem('warung_name', currentShopName); // Simpan ke memori browser
+        document.getElementById('shopNameDisplay').innerText = currentShopName; // Update tampilan atas
+        document.getElementById('shopNameInput').value = ""; // Kosongkan input
+        alert('Nama billing berhasil diubah menjadi: ' + currentShopName);
+    } else {
+        alert('Nama tidak boleh kosong!');
+    }
+}
+
+// 1. Fungsi Simpan Produk Baru/Update
+function saveProduct(e) {
+    e.preventDefault();
+    let barcode = document.getElementById('prodBarcode').value;
+    let name = document.getElementById('prodName').value;
+    let cost = parseInt(document.getElementById('prodCost').value);
+    let price = parseInt(document.getElementById('prodPrice').value);
+    let stock = parseInt(document.getElementById('prodStock').value);
+    
+    inventory[barcode] = { name, cost, price, stock, profit: (price - cost) };
+    localStorage.setItem('warung_inventory', JSON.stringify(inventory));
+    
+    document.getElementById('productForm').reset();
+    updateTables();
+    alert('Produk berhasil disimpan!');
+}
+
+// 2. Deteksi Scan Barcode Belanjaan (Menekan Enter)
+document.getElementById('scanInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        let barcode = this.value.trim();
+        if (inventory[barcode]) {
+            if (inventory[barcode].stock > 0) {
+                let cartItem = cart.find(item => item.barcode === barcode);
+                if (cartItem) {
+                    cartItem.qty++;
+                } else {
+                    cart.push({ barcode, name: inventory[barcode].name, price: inventory[barcode].price, qty: 1, profit: inventory[barcode].profit });
+                }
+                updateCart();
+            } else {
+                alert('Stok barang ini habis!');
+            }
+        } else {
+            alert('Barcode tidak terdaftar! Silakan daftarkan dulu di form bawah.');
+        }
+        this.value = ''; // Kosongkan input untuk scan selanjutnya
+    }
+});
+
+// 3. Update Tampilan Keranjang
+function updateCart() {
+    let tbody = document.querySelector('#cartTable tbody');
+    tbody.innerHTML = '';
+    let total = 0;
+    cart.forEach(item => {
+        let subtotal = item.price * item.qty;
+        total += subtotal;
+        tbody.innerHTML += `<tr><td>${item.name}</td><td>${item.price}</td><td>${item.qty}</td><td>${subtotal}</td></tr>`;
+    });
+    document.getElementById('grandTotal').innerText = total.toLocaleString('id-ID');
+}
+
+// 4. Proses Bayar (Checkout)
+function checkout() {
+    if (cart.length === 0) return alert('Keranjang masih kosong!');
+    
+    cart.forEach(item => {
+        inventory[item.barcode].stock -= item.qty; // Potong stok
+        reports.omzet += (item.price * item.qty); // Tambah omzet
+        reports.profit += (item.profit * item.qty); // Tambah profit bersih
+    });
+    
+    localStorage.setItem('warung_inventory', JSON.stringify(inventory));
+    localStorage.setItem('warung_reports', JSON.stringify(reports));
+    
+    cart = [];
+    updateCart();
+    updateTables();
+    alert('Transaksi Berhasil! Stok dipotong & profit dicatat.');
+}
+
+// 5. Perbarui Tabel Inventori & Laporan di Layar
+function updateTables() {
+    // Tampilkan nama warung yang tersimpan
+    document.getElementById('shopNameDisplay').innerText = currentShopName;
+
+    // Update Laporan
+    document.getElementById('repOmzet').innerText = 'Rp ' + reports.omzet.toLocaleString('id-ID');
+    document.getElementById('repProfit').innerText = 'Rp ' + reports.profit.toLocaleString('id-ID');
+    
+    // Update Tabel Barang
+    let tbody = document.querySelector('#inventoryTable tbody');
+    tbody.innerHTML = '';
+    for (let barcode in inventory) {
+        let item = inventory[barcode];
+        tbody.innerHTML += `<tr>
+            <td>${barcode}</td>
+            <td>${item.name}</td>
+            <td><span class="badge ${item.stock < 5 ? 'bg-danger':'bg-success'}">${item.stock}</span></td>
+            <td>${item.price}</td>
+            <td>${item.profit}</td>
+        </tr>`;
+    }
+}
+
+// Jalankan fungsi update saat aplikasi pertama kali dibuka
+updateTables();
+</script>
+
+</body>
+</html>
